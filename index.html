@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1a202c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>تحدي 60 يوماً - كاليستنيكس</title>
+  
+  <!-- PWA Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Ionic Framework -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+  
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <!-- Canvas Confetti for Celebration Effects -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ion-font-family: 'Tajawal', sans-serif;
+      --ion-color-primary: #1a202c;
+      --ion-color-secondary: #3b82f6;
+      --ion-color-success: #10b981;
+      --app-bg: #f8fafc;
+      --card-bg: #ffffff;
+    }
+    
+    body { font-family: var(--ion-font-family); }
+    ion-content { --background: var(--app-bg); }
+
+    ion-toolbar {
+      --background: var(--card-bg);
+      --color: var(--ion-color-primary);
+      --border-width: 0 !important;
+      padding-top: env(safe-area-inset-top);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .header-title-custom { font-weight: 800; font-size: 1.25rem; }
+
+    /* Top Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,0.02);
+    }
+    .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--ion-color-primary); }
+    .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 4px; }
+    .stat-icon-wrapper {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+    }
+    .bg-blue-light { background: #eff6ff; color: #3b82f6; }
+    .bg-green-light { background: #ecfdf5; color: #10b981; }
+
+    /* Day Selector Button */
+    .day-selector-btn {
+      margin: 0 16px 16px 16px;
+      --background: var(--card-bg);
+      --color: var(--ion-color-primary);
+      --box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      --border-radius: 16px;
+      font-weight: 700; font-size: 1.1rem;
+    }
+
+    /* Lists and Cards */
+    .custom-list { background: transparent; margin: 0 16px 24px 16px; }
+    .list-header-custom {
+      font-size: 1.1rem; font-weight: 800; color: var(--ion-color-primary);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+
+    ion-item.task-item {
+      --background: var(--card-bg);
+      --border-radius: 12px;
+      --padding-start: 16px;
+      --inner-padding-end: 16px;
+      margin-bottom: 8px; --border-width: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      font-weight: 500; font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    /* Checked State Animation */
+    ion-item.task-item.completed { opacity: 0.7; }
+    ion-item.task-item.completed ion-label {
+      text-decoration: line-through; color: #94a3b8; transition: all 0.3s ease;
+    }
+    
+    @keyframes checkBounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    ion-checkbox.animated {
+      animation: checkBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    ion-checkbox {
+      --size: 22px;
+      --checkbox-background-checked: var(--ion-color-secondary);
+      --border-color-checked: var(--ion-color-secondary);
+      --border-radius: 6px; --border-width: 2px; --border-color: #cbd5e1;
+      margin-inline-end: 12px; transition: transform 0.2s ease;
+    }
+    ion-checkbox::part(container) { border-radius: 6px; }
+
+    /* Badges */
+    .badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+      margin-inline-start: auto; transition: all 0.3s ease; white-space: nowrap;
+    }
+    .badge-meal { background: #fef3c7; color: #d97706; }
+    .badge-workout { background: #fee2e2; color: #ef4444; }
+    .badge-cheat { background: #fce7f3; color: #db2777; }
+    
+    ion-item.completed .badge { background: #f1f5f9; color: #94a3b8; }
+
+    /* Chart Container */
+    .chart-wrapper {
+      background: var(--card-bg); border-radius: 20px; padding: 24px 16px; margin: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .chart-title { font-weight: 800; font-size: 1.2rem; color: var(--ion-color-primary); margin-bottom: 20px; text-align: center; }
+
+    /* Custom Tab Bar */
+    ion-tab-bar {
+      --background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom);
+      height: calc(60px + env(safe-area-inset-bottom));
+    }
+    ion-tab-button { --color: #94a3b8; --color-selected: var(--ion-color-secondary); }
+    ion-tab-button ion-icon { font-size: 24px; margin-bottom: 4px; }
+    ion-tab-button ion-label { font-weight: 600; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <ion-app>
+    <ion-tabs>
+      
+      <!-- TAB 1: Daily Plan -->
+      <ion-tab tab="plan">
+        <ion-header>
+          <ion-toolbar>
+            <ion-title class="header-title-custom">تحدي 60 يوماً</ion-title>
+            <ion-buttons slot="end">
+              <ion-button color="primary"><ion-icon name="notifications-outline"></ion-icon></ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content>
+          <!-- Top Stats -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon-wrapper bg-blue-light">
+                <ion-icon name="flame" style="font-size: 20px;"></ion-icon>
+              </div>
+              <div class="stat-value" id="streak-stat">0</div>
+              <div class="stat-label">مهام مكتملة</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon-wrapper bg-green-light">
+                <ion-icon name="trophy" style="font-size: 20px;"></ion-icon>
+              </div>
+              <div class="stat-value" id="today-progress">0%</div>
+              <div class="stat-label">إنجاز اليوم</div>
+            </div>
+          </div>
+
+          <!-- Day Selector -->
+          <ion-button expand="block" class="day-selector-btn" id="open-day-select">
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+            <span id="day-btn-text">عرض الأيام: اليوم 1</span>
+            <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+          </ion-button>
+          <ion-select id="day-select" interface="action-sheet" placeholder="اختر اليوم" class="ion-hide"></ion-select>
+          
+          <!-- Dynamic Lists Containers -->
+          <div id="nutrition-list" class="custom-list"></div>
+          <div id="workout-list" class="custom-list"></div>
+          
+          <div style="height: 20px;"></div>
+        </ion-content>
+      </ion-tab>
+
+      <!-- TAB 2: Progress -->
+      <ion-tab tab="progress">
+        <ion-header>
+          <ion-toolbar>
+            <ion-title class="header-title-custom">الإحصائيات</ion-title>
+          </ion-toolbar>
+        </ion-header>
+        
+        <ion-content>
+          <div class="chart-wrapper">
+            <div class="chart-title">معدل الإنجاز العام</div>
+            <div id="apex-chart"></div>
+          </div>
+          
+          <div style="padding: 0 16px;">
+             <ion-item lines="none" style="--background: #fff; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                <ion-icon name="checkmark-circle" color="success" slot="start" style="font-size: 28px;"></ion-icon>
+                <ion-label>
+                  <h2 style="font-weight: 700; color: #1a202c;">مجموع المهام المنجزة</h2>
+                  <p id="total-tasks-stat">0 مهمة مكتملة</p>
+                </ion-label>
+             </ion-item>
+             
+             <ion-item lines="none" style="--background: #fff; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                <ion-icon name="restaurant" color="warning" slot="start" style="font-size: 28px;"></ion-icon>
+                <ion-label>
+                  <h2 style="font-weight: 700; color: #1a202c;">أيام الوجبات المفتوحة</h2>
+                  <p>كل 10 أيام في البرنامج</p>
+                </ion-label>
+             </ion-item>
+          </div>
+        </ion-content>
+      </ion-tab>
+
+      <!-- Bottom Tab Bar -->
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="plan">
+          <ion-icon name="calendar-clear"></ion-icon>
+          <ion-label>المهام</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="progress">
+          <ion-icon name="stats-chart"></ion-icon>
+          <ion-label>الإحصائيات</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-app>
+
+  <script>
+    const mealsList = [
+      { breakfast: "3 بيضات كاملة + توست أسمر + خيار", lunch: "150جم صدر دجاج + 6 ملاعق أرز + سلطة", dinner: "150جم جبن قريش + خضروات", snack: "موزة + مكسرات نيئة" },
+      { breakfast: "شوفان بحليب قليل الدسم وبذور الشيا", lunch: "150جم فيليه سمك + بطاطس مشوية + بروكلي", dinner: "زبادي يوناني + خيار", snack: "تفاحة + زبدة فول سوداني" },
+      { breakfast: "فول بزيت الزيتون + نصف رغيف بر", lunch: "150جم لحم مفروم + 6 ملاعق مكرونة سمراء", dinner: "بيضتان مسلوقتان + سلطة", snack: "برتقالة + فستق" },
+      { breakfast: "أومليت بالسبانخ + توست أسمر", lunch: "سلطة تونة بالذرة وزيت الزيتون", dinner: "جبن حلوم مشوي + طماطم", snack: "شوكولاتة داكنة + 3 تمرات" },
+      { breakfast: "بان كيك صحي (شوفان، بيض، موز)", lunch: "شيش طاووق + 6 ملاعق برغل + سلطة", dinner: "ساندويتش تونة بخبز أسمر", snack: "شريحة بطيخ" },
+      { breakfast: "جبن فيتا قليلة الدسم + خبز بر", lunch: "إدام خضار بالفرن + قطع لحم", dinner: "زبادي يوناني بقرفة", snack: "جزر وخيار مع حمص" },
+      { breakfast: "شكشوكة بمسحة زيت زيتون + خبز بر", lunch: "كبسة صحية (دجاج منزوع الجلد)", dinner: "سلطة دجاج بصلصة الليمون", snack: "موزة + حليب" }
+    ];
+
+    const workoutExercises = [
+      "تمرين الدفع المائل (Incline Push-ups) - 3 × 12",
+      "تمرين السحب عند الباب (Doorway Rows) - 3 × 12",
+      "تمرين القرفصاء (Box Squats) - 3 × 15",
+      "تمرين ثبات الجذع (Knee Plank) - 3 × 30 ثانية",
+      "تمرين جسر الحوض (Glute Bridges) - 3 × 15"
+    ];
+
+    const restActivities = [
+      "إطالات الجذع والصدر - 30 ثانية",
+      "إطالة أوتار الركبة وأسفل الظهر - 30 ثانية",
+      "وضعية الطفل (Child's Pose) - 1 دقيقة",
+      "مشي خفيف للاستشفاء - 30 دقيقة"
+    ];
+
+    let userProgress = JSON.parse(localStorage.getItem('pwaAppProgress')) || {};
+    let currentDay = 1;
+
+    const daySelect = document.getElementById('day-select');
+    const openDayBtn = document.getElementById('open-day-select');
+    const dayBtnText = document.getElementById('day-btn-text');
+    const nutList = document.getElementById('nutrition-list');
+    const workList = document.getElementById('workout-list');
+
+    for(let i=1; i<=60; i++){
+      const opt = document.createElement('ion-select-option');
+      opt.value = i; opt.textContent = `اليوم ${i}`;
+      daySelect.appendChild(opt);
+    }
+
+    openDayBtn.addEventListener('click', () => daySelect.open());
+    
+    daySelect.addEventListener('ionChange', (e) => {
+      currentDay = parseInt(e.detail.value);
+      dayBtnText.innerText = `عرض الأيام: اليوم ${currentDay}`;
+      renderDay(currentDay);
+    });
+
+    function createItemHtml(day, id, label, badgeText, badgeClass, iconHTML) {
+      const key = `d${day}_${id}`;
+      const checked = userProgress[key] ? 'checked="true"' : '';
+      const compClass = userProgress[key] ? 'completed' : '';
+      const badge = badgeText ? `<span class="badge ${badgeClass}">${badgeText}</span>` : '';
+      return `
+        <ion-item class="task-item ${compClass}" lines="none">
+          <ion-checkbox slot="start" data-key="${key}" ${checked}></ion-checkbox>
+          <ion-label class="ion-text-wrap">${label}</ion-label>
+          ${badge}
+          ${iconHTML || ''}
+        </ion-item>`;
+    }
+
+    function renderDay(day) {
+      const week = Math.ceil(day / 7);
+      const isWorkoutDay = (day % 2 !== 0);
+      const isCheatDay = (day % 10 === 0);
+      const meal = mealsList[(day - 1) % 7];
+
+      let steps = (week <= 2) ? (isWorkoutDay ? "5,000" : "7,000") :
+                  (week <= 4) ? (isWorkoutDay ? "6,000" : "8,000 - 10,000") :
+                                (isWorkoutDay ? "7,000" : "10,000");
+
+      let nHtml = `<div class="list-header-custom"><span style="font-size: 1.4rem;">🥗</span> خطة التغذية</div>`;
+      nHtml += createItemHtml(day, 'n_bf', meal.breakfast, 'إفطار', 'badge-meal');
+      
+      if(isCheatDay) {
+        nHtml += createItemHtml(day, 'n_cht', 'الوجبة المفتوحة (غداء أو عشاء مبكر)', 'مفتوحة', 'badge-cheat');
+        nHtml += createItemHtml(day, 'n_oth', `الوجبة الأخرى: ${meal.lunch} أو ${meal.dinner}`, 'أساسية', 'badge-meal');
+      } else {
+        nHtml += createItemHtml(day, 'n_lun', meal.lunch, 'غداء', 'badge-meal');
+        nHtml += createItemHtml(day, 'n_din', meal.dinner, 'عشاء', 'badge-meal');
+      }
+      nHtml += createItemHtml(day, 'n_snk', meal.snack, 'سناك', 'badge-meal');
+      nHtml += createItemHtml(day, 'n_wtr', 'شرب 3 إلى 4 لتر ماء', '', '', '<ion-icon name="water" color="tertiary" slot="end"></ion-icon>');
+      nutList.innerHTML = nHtml;
+
+      let wHtml = `<div class="list-header-custom"><span style="font-size: 1.4rem;">${isWorkoutDay ? '🏋️‍♂️' : '🧘‍♂️'}</span> ${isWorkoutDay ? 'النشاط البدني' : 'الراحة والاستشفاء'}</div>`;
+      
+      if(isWorkoutDay) {
+        workoutExercises.forEach((ex, i) => {
+          wHtml += createItemHtml(day, `w_ex_${i}`, ex, 'تمرين', 'badge-workout');
+        });
+      } else {
+        restActivities.forEach((act, i) => {
+          wHtml += createItemHtml(day, `w_rs_${i}`, act, 'استشفاء', 'badge-rest');
+        });
+      }
+      wHtml += createItemHtml(day, 'w_stp', `إكمال ${steps} خطوة`, '', '', '<ion-icon name="walk" color="success" slot="end"></ion-icon>');
+      workList.innerHTML = wHtml;
+
+      updateStatsDisplay();
+    }
+
+    document.addEventListener('ionChange', (e) => {
+      if (e.target.tagName.toLowerCase() === 'ion-checkbox') {
+        const key = e.target.getAttribute('data-key');
+        if(!key) return;
+        
+        const isChecked = e.detail.checked;
+        const item = e.target.closest('ion-item');
+        
+        userProgress[key] = isChecked;
+        localStorage.setItem('pwaAppProgress', JSON.stringify(userProgress));
+
+        if(isChecked) {
+          item.classList.add('completed');
+          e.target.classList.add('animated');
+          setTimeout(() => e.target.classList.remove('animated'), 400);
+
+          const rect = e.target.getBoundingClientRect();
+          const x = (rect.left + rect.width / 2) / window.innerWidth;
+          const y = (rect.top + rect.height / 2) / window.innerHeight;
+          
+          confetti({
+            particleCount: 50, spread: 60, origin: { x, y },
+            colors: ['#3b82f6', '#10b981', '#f59e0b'], disableForReducedMotion: true
+          });
+        } else {
+          item.classList.remove('completed');
+        }
+        
+        updateStatsDisplay();
+      }
+    });
+
+    function updateStatsDisplay() {
+      let todayTotal = 0;
+      let todayCompleted = 0;
+      let allCompleted = 0;
+
+      allCompleted = Object.values(userProgress).filter(v => v === true).length;
+      
+      const currentDayCheckboxes = document.querySelectorAll('ion-checkbox[data-key]');
+      todayTotal = currentDayCheckboxes.length;
+      
+      currentDayCheckboxes.forEach(cb => {
+        if(userProgress[cb.getAttribute('data-key')]) todayCompleted++;
+      });
+
+      const todayPercent = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
+      
+      document.getElementById('streak-stat').innerText = allCompleted;
+      document.getElementById('today-progress').innerText = todayPercent + '%';
+      document.getElementById('total-tasks-stat').innerText = `${allCompleted} مهمة مكتملة إجمالاً`;
+    }
+
+    let chart;
+    function initChart() {
+      var options = {
+        series: [{ name: 'نسبة الإنجاز', data: [12, 35, 55, 60, 78, 82, 90, 85, 95] }],
+        chart: { height: 280, type: 'area', fontFamily: 'Tajawal, sans-serif', toolbar: { show: false } },
+        colors: ['#3b82f6'],
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 4 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 90, 100] } },
+        xaxis: { categories: ['أ 1', 'أ 2', 'أ 3', 'أ 4', 'أ 5', 'أ 6', 'أ 7', 'أ 8', 'أ 9'], axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { max: 100, labels: { formatter: (val) => val + "%" } },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
+      };
+      chart = new ApexCharts(document.querySelector("#apex-chart"), options);
+      chart.render();
+    }
+
+    let chartRendered = false;
+    document.addEventListener('ionTabWillChange', (e) => {
+        if(e.detail.tab === 'progress' && !chartRendered) {
+            setTimeout(() => {
+                initChart();
+                chartRendered = true;
+            }, 150); 
+        }
+    });
+
+    renderDay(currentDay);
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered!'))
+                .catch(err => console.log('Service Worker failed.', err));
+        });
+    }
+  </script>
+</body>
+</html>
